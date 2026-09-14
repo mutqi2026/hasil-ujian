@@ -528,31 +528,33 @@
       }
     }
 
-    function parseTanggal(str) {
-      if (!str) return null;
-      if (str instanceof Date) return str;
-      
-      const cleanStr = String(str).trim();
-      const datePart = cleanStr.split(' ')[0];
-      
-      const parts = datePart.split(/[\/\-]/);
-      if (parts.length === 3) {
-        let day, month, year;
-        if (parts[0].length === 4) {
-          year = parseInt(parts[0], 10);
-          month = parseInt(parts[1], 10) - 1;
-          day = parseInt(parts[2], 10);
-        } else {
-          day = parseInt(parts[0], 10);
-          month = parseInt(parts[1], 10) - 1;
-          year = parseInt(parts[2], 10);
-        }
-        return new Date(year, month, day);
-      }
-      
-      const parsed = new Date(cleanStr);
-      return isNaN(parsed.getTime()) ? null : parsed;
+function parseTanggal(str) {
+  if (!str) return null;
+  if (str instanceof Date) return str;
+  
+  // Ambil hanya bagian tanggal jika ada spasi yang memisahkan jam/waktu
+  const cleanStr = String(str).trim().split(' ')[0];
+  
+  const parts = cleanStr.split(/[\/\-]/);
+  if (parts.length === 3) {
+    let day, month, year;
+    if (parts[0].length === 4) {
+      // Format YYYY-MM-DD
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+      day = parseInt(parts[2], 10);
+    } else {
+      // Format DD/MM/YYYY atau DD-MM-YYYY
+      day = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+      year = parseInt(parts[2], 10);
     }
+    return new Date(year, month, day);
+  }
+  
+  const parsed = new Date(cleanStr);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
 
     function preparePrint(type) {
       const today = new Date();
@@ -608,18 +610,19 @@
       document.getElementById('pdf-predikat-dominan').innerText = topPredikat;
 
       const pdfTbody = document.getElementById('pdf-table-body');
-      pdfTbody.innerHTML = filteredData.map((item, idx) => `
-        <tr class="border-b border-slate-200">
-          <td class="border border-slate-300 p-2 text-center">${idx + 1}</td>
-          <td class="border border-slate-300 p-2">${item.tanggal ? String(item.tanggal).split(' ')[0] : ''}</td>
-          <td class="border border-slate-300 p-2 font-semibold">${item.nama || ''}</td>
-          <td class="border border-slate-300 p-2 text-center">${item.kelas || ''}</td>
-          <td class="border border-slate-300 p-2">${item.muhafizh || ''}</td>
-          <td class="border border-slate-300 p-2 text-center font-semibold">${item.juz || ''}</td>
-          <td class="border border-slate-300 p-2 text-center font-bold">${item.nilai || ''}</td>
-          <td class="border border-slate-300 p-2">${item.predikat || ''}</td>
-        </tr>
-      `).join('');
+pdfTbody.innerHTML = filteredData.map((item, idx) => `
+  <tr class="border-b border-slate-200">
+    <td class="border border-slate-300 p-2 text-center">${idx + 1}</td>
+    <!-- Mengambil bagian tanggal saja sebelum spasi/jam -->
+    <td class="border border-slate-300 p-2">${item.tanggal ? String(item.tanggal).split(' ')[0] : ''}</td>
+    <td class="border border-slate-300 p-2 font-semibold">${item.nama || ''}</td>
+    <td class="border border-slate-300 p-2 text-center">${item.kelas || ''}</td>
+    <td class="border border-slate-300 p-2">${item.muhafizh || ''}</td>
+    <td class="border border-slate-300 p-2 text-center font-semibold">${item.juz || ''}</td>
+    <td class="border border-slate-300 p-2 text-center font-bold">${item.nilai || ''}</td>
+    <td class="border border-slate-300 p-2">${item.predikat || ''}</td>
+  </tr>
+`).join('');
 
       window.print();
     }
