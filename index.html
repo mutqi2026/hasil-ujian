@@ -322,6 +322,16 @@
       loadTableData();
     };
 
+    function formatTglTampil(str) {
+  if (!str) return '-';
+  const clean = String(str).split('T')[0]; // Menghilangkan jam/ISO format
+  const parts = clean.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`; // Hasil: 17/08/2026
+  }
+  return clean;
+}
+
     function loadTableData() {
       fetch(`${SCRIPT_URL}?action=getData`)
         .then(res => res.json())
@@ -345,7 +355,7 @@
 
       tbody.innerHTML = globalData.map((item) => `
         <tr class="border-b hover:bg-slate-50 transition">
-          <td class="px-4 py-3 whitespace-nowrap text-xs text-slate-500">${item.tanggal || '-'}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-xs text-slate-500">${formatTglTampil(item.tanggal)}</td>     
           <td class="px-4 py-3 font-semibold text-slate-800">${item.nama || ''}</td>
           <td class="px-4 py-3">${item.kelas || ''}</td>
           <td class="px-4 py-3">${item.muhafizh || ''}</td>
@@ -609,20 +619,36 @@ function parseTanggal(str) {
       const topPredikat = Object.keys(predikatCounts).reduce((a, b) => predikatCounts[a] > predikatCounts[b] ? a : b, '-');
       document.getElementById('pdf-predikat-dominan').innerText = topPredikat;
 
-      const pdfTbody = document.getElementById('pdf-table-body');
-pdfTbody.innerHTML = filteredData.map((item, idx) => `
-  <tr class="border-b border-slate-200">
-    <td class="border border-slate-300 p-2 text-center">${idx + 1}</td>
-    <!-- Mengambil bagian tanggal saja sebelum spasi/jam -->
-    <td class="border border-slate-300 p-2">${item.tanggal ? String(item.tanggal).split(' ')[0] : ''}</td>
-    <td class="border border-slate-300 p-2 font-semibold">${item.nama || ''}</td>
-    <td class="border border-slate-300 p-2 text-center">${item.kelas || ''}</td>
-    <td class="border border-slate-300 p-2">${item.muhafizh || ''}</td>
-    <td class="border border-slate-300 p-2 text-center font-semibold">${item.juz || ''}</td>
-    <td class="border border-slate-300 p-2 text-center font-bold">${item.nilai || ''}</td>
-    <td class="border border-slate-300 p-2">${item.predikat || ''}</td>
-  </tr>
-`).join('');
+const pdfTbody = document.getElementById('pdf-table-body');
+pdfTbody.innerHTML = filteredData.map((item, idx) => {
+  // 1. Ambil bagian YYYY-MM-DD saja (buang jam/ISO 'T17:00:00...')
+  const cleanDate = item.tanggal ? String(item.tanggal).split('T')[0].split(' ')[0] : '';
+  
+  // 2. Format menjadi "17 Agustus 2026"
+  let formattedDate = '-';
+  const parts = cleanDate.split('-');
+  if (parts.length === 3) {
+    const tgl = parseInt(parts[2], 10);
+    const bln = parseInt(parts[1], 10) - 1; // Index bulan 0-11
+    const thn = parts[0];
+    if (namaBulan[bln]) {
+      formattedDate = `${tgl} ${namaBulan[bln]} ${thn}`;
+    }
+  }
+
+  return `
+    <tr class="border-b border-slate-200">
+      <td class="border border-slate-300 p-2 text-center">${idx + 1}</td>
+      <td class="border border-slate-300 p-2 text-center font-medium">${formattedDate}</td>
+      <td class="border border-slate-300 p-2 font-semibold">${item.nama || ''}</td>
+      <td class="border border-slate-300 p-2 text-center">${item.kelas || ''}</td>
+      <td class="border border-slate-300 p-2">${item.muhafizh || ''}</td>
+      <td class="border border-slate-300 p-2 text-center font-semibold">${item.juz || ''}</td>
+      <td class="border border-slate-300 p-2 text-center font-bold">${item.nilai || ''}</td>
+      <td class="border border-slate-300 p-2">${item.predikat || ''}</td>
+    </tr>
+  `;
+}).join('');
 
       window.print();
     }
