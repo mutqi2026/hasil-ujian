@@ -30,24 +30,19 @@
         margin: 15mm 12mm;
       }
 
-      /* KOP sekolah pada hasil cetak/PDF */
-      .kop-laporan {
-        width: 100%;
+      /* Kop eksternal ikut tampil saat Print / Save as PDF */
+      #print-area .kop-laporan,
+      #print-area .kop-laporan img {
+        display: block !important;
+        visibility: visible !important;
       }
 
-      .kop-image {
-        display: block;
-        width: 100%;
-        max-width: 804px;
-        height: auto;
-        margin: 0 auto;
-      }
-
-      @media screen {
-        .kop-image {
-          max-height: 110px;
-          object-fit: contain;
-        }
+      #print-area .kop-laporan img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 32mm !important;
+        object-fit: contain !important;
       }
     }
   </style>
@@ -201,18 +196,20 @@
 
     <!-- AREAL CETAK / PDF (Tampilan A4 Profesional) -->
     <div id="print-area" class="hidden print:block bg-white text-slate-900 p-2">
-      <!-- KOP Surat / Header Laporan -->
-      <div class="kop-laporan mb-4">
+      <!-- KOP SURAT / HEADER LAPORAN -->
+      <div class="mb-4 text-center kop-laporan">
         <img
-          class="kop-image"
           src="kopbisc.png"
           alt="Kop Bandung Islamic School"
+          class="w-full h-auto mx-auto"
+          style="max-height: 32mm; object-fit: contain;"
         >
+      </div>
 
-        <div class="text-center mt-3 pt-2 border-t-2 border-slate-800">
-          <h2 id="pdf-report-title" class="text-lg font-bold text-slate-800">LAPORAN UJIAN KENAIKAN JUZ</h2>
-          <p id="pdf-report-subtitle" class="text-xs text-slate-500">Periode: September 2026</p>
-        </div>
+      <!-- JUDUL LAPORAN -->
+      <div class="text-center mb-4">
+        <h2 id="pdf-report-title" class="text-lg font-bold text-slate-800">LAPORAN UJIAN KENAIKAN JUZ</h2>
+        <p id="pdf-report-subtitle" class="text-xs text-slate-500">Periode: September 2026</p>
       </div>
 
       <!-- Ringkasan Stat -->
