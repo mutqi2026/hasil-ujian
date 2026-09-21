@@ -363,37 +363,45 @@
     }
 
     function renderTable(data) {
-      globalData = data || [];
-      const tbody = document.getElementById('table-body');
-      document.getElementById('data-count').innerText = globalData.length + ' Data';
+  globalData = data || [];
+  
+  // URUTKAN TANGGAL DARI TERLAMA KE TERBARU (Ascending)
+  globalData.sort((a, b) => {
+    const dateA = parseTanggal(a.tanggal) || new Date(0);
+    const dateB = parseTanggal(b.tanggal) || new Date(0);
+    return dateA - dateB; // Gunakan (dateB - dateA) jika ingin dari yang terbaru ke terlama
+  });
 
-      if (!globalData || globalData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">Tidak ada data ditemukan.</td></tr>`;
-        return;
-      }
+  const tbody = document.getElementById('table-body');
+  document.getElementById('data-count').innerText = globalData.length + ' Data';
 
-      tbody.innerHTML = globalData.map((item) => `
-        <tr class="border-b hover:bg-slate-50 transition">
-          <td class="px-4 py-3 whitespace-nowrap text-xs text-slate-500">${formatTglTampil(item.tanggal)}</td>     
-          <td class="px-4 py-3 font-semibold text-slate-800">${item.nama || ''}</td>
-          <td class="px-4 py-3">${item.kelas || ''}</td>
-          <td class="px-4 py-3">${item.muhafizh || ''}</td>
-          <td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded font-medium">${item.juz || '-'}</span></td>
-          <td class="px-4 py-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-medium">${item.nilai || '-'}</span></td>
-          <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">${item.predikat || '-'}</span></td>
-          <td class="px-4 py-3 text-xs max-w-xs truncate">${item.catatan || '-'}</td>
-          <td class="px-4 py-3 text-center whitespace-nowrap text-xs space-x-1">
-            ${item.foto ? `<a href="${item.foto}" target="_blank" class="text-emerald-600 hover:underline"><i class="fa-solid fa-image"></i> Foto</a>` : '<span class="text-slate-300">-</span>'}
-            <span class="text-slate-300">|</span>
-            ${item.sertifikat ? `<a href="${item.sertifikat}" target="_blank" class="text-blue-600 hover:underline"><i class="fa-solid fa-file-contract"></i> Sertifikat</a>` : '<span class="text-slate-300">-</span>'}
-          </td>
-          <td class="px-4 py-3 text-center whitespace-nowrap space-x-2">
-            <button onclick="editRow(${item.rowIndex})" class="text-indigo-600 hover:text-indigo-900 p-1"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button onclick="deleteRow(${item.rowIndex})" class="text-rose-600 hover:text-rose-900 p-1"><i class="fa-solid fa-trash"></i> Hapus</button>
-          </td>
-        </tr>
-      `).join('');
-    }
+  if (!globalData || globalData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">Tidak ada data ditemukan.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = globalData.map((item) => `
+    <tr class="border-b hover:bg-slate-50 transition">
+      <td class="px-4 py-3 whitespace-nowrap text-xs text-slate-500">${formatTglTampil(item.tanggal)}</td>     
+      <td class="px-4 py-3 font-semibold text-slate-800">${item.nama || ''}</td>
+      <td class="px-4 py-3">${item.kelas || ''}</td>
+      <td class="px-4 py-3">${item.muhafizh || ''}</td>
+      <td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded font-medium">${item.juz || '-'}</span></td>
+      <td class="px-4 py-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-medium">${item.nilai || '-'}</span></td>
+      <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">${item.predikat || '-'}</span></td>
+      <td class="px-4 py-3 text-xs max-w-xs truncate">${item.catatan || '-'}</td>
+      <td class="px-4 py-3 text-center whitespace-nowrap text-xs space-x-1">
+        ${item.foto ? `<a href="${item.foto}" target="_blank" class="text-emerald-600 hover:underline"><i class="fa-solid fa-image"></i> Foto</a>` : '<span class="text-slate-300">-</span>'}
+        <span class="text-slate-300">|</span>
+        ${item.sertifikat ? `<a href="${item.sertifikat}" target="_blank" class="text-blue-600 hover:underline"><i class="fa-solid fa-file-contract"></i> Sertifikat</a>` : '<span class="text-slate-300">-</span>'}
+      </td>
+      <td class="px-4 py-3 text-center whitespace-nowrap space-x-2">
+        <button onclick="editRow(${item.rowIndex})" class="text-indigo-600 hover:text-indigo-900 p-1"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+        <button onclick="deleteRow(${item.rowIndex})" class="text-rose-600 hover:text-rose-900 p-1"><i class="fa-solid fa-trash"></i> Hapus</button>
+      </td>
+    </tr>
+  `).join('');
+}
 
     function openModalForAdd() {
       closeModal();
@@ -585,7 +593,7 @@ function parseTanggal(str) {
   return isNaN(parsed.getTime()) ? null : parsed;
 }
 
-    function preparePrint(type) {
+function preparePrint(type) {
       const today = new Date();
       const dateStr = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('pdf-print-date').innerText = dateStr;
@@ -628,6 +636,13 @@ function parseTanggal(str) {
         return;
       }
 
+      // URUTKAN TANGGAL DI CETAKAN (Ascending: tanggal terkecil ke terbesar)
+      filteredData.sort((a, b) => {
+        const dateA = parseTanggal(a.tanggal) || new Date(0);
+        const dateB = parseTanggal(b.tanggal) || new Date(0);
+        return dateA - dateB;
+      });
+
       document.getElementById('pdf-total-santri').innerText = filteredData.length;
       
       const predikatCounts = {};
@@ -638,36 +653,34 @@ function parseTanggal(str) {
       const topPredikat = Object.keys(predikatCounts).reduce((a, b) => predikatCounts[a] > predikatCounts[b] ? a : b, '-');
       document.getElementById('pdf-predikat-dominan').innerText = topPredikat;
 
-const pdfTbody = document.getElementById('pdf-table-body');
-pdfTbody.innerHTML = filteredData.map((item, idx) => {
-  // 1. Ambil bagian YYYY-MM-DD saja (buang jam/ISO 'T17:00:00...')
-  const cleanDate = item.tanggal ? String(item.tanggal).split('T')[0].split(' ')[0] : '';
-  
-  // 2. Format menjadi "17 Agustus 2026"
-  let formattedDate = '-';
-  const parts = cleanDate.split('-');
-  if (parts.length === 3) {
-    const tgl = parseInt(parts[2], 10);
-    const bln = parseInt(parts[1], 10) - 1; // Index bulan 0-11
-    const thn = parts[0];
-    if (namaBulan[bln]) {
-      formattedDate = `${tgl} ${namaBulan[bln]} ${thn}`;
-    }
-  }
+      const pdfTbody = document.getElementById('pdf-table-body');
+      pdfTbody.innerHTML = filteredData.map((item, idx) => {
+        const cleanDate = item.tanggal ? String(item.tanggal).split('T')[0].split(' ')[0] : '';
+        
+        let formattedDate = '-';
+        const parts = cleanDate.split('-');
+        if (parts.length === 3) {
+          const tgl = parseInt(parts[2], 10);
+          const bln = parseInt(parts[1], 10) - 1;
+          const thn = parts[0];
+          if (namaBulan[bln]) {
+            formattedDate = `${tgl} ${namaBulan[bln]} ${thn}`;
+          }
+        }
 
-  return `
-    <tr class="border-b border-slate-200">
-      <td class="border border-slate-300 p-2 text-center">${idx + 1}</td>
-      <td class="border border-slate-300 p-2 text-center font-medium">${formattedDate}</td>
-      <td class="border border-slate-300 p-2 font-semibold">${item.nama || ''}</td>
-      <td class="border border-slate-300 p-2 text-center">${item.kelas || ''}</td>
-      <td class="border border-slate-300 p-2">${item.muhafizh || ''}</td>
-      <td class="border border-slate-300 p-2 text-center font-semibold">${item.juz || ''}</td>
-      <td class="border border-slate-300 p-2 text-center font-bold">${item.nilai || ''}</td>
-      <td class="border border-slate-300 p-2">${item.predikat || ''}</td>
-    </tr>
-  `;
-}).join('');
+        return `
+          <tr class="border-b border-slate-200">
+            <td class="border border-slate-300 p-2 text-center">${idx + 1}</td>
+            <td class="border border-slate-300 p-2 text-center font-medium">${formattedDate}</td>
+            <td class="border border-slate-300 p-2 font-semibold">${item.nama || ''}</td>
+            <td class="border border-slate-300 p-2 text-center">${item.kelas || ''}</td>
+            <td class="border border-slate-300 p-2">${item.muhafizh || ''}</td>
+            <td class="border border-slate-300 p-2 text-center font-semibold">${item.juz || ''}</td>
+            <td class="border border-slate-300 p-2 text-center font-bold">${item.nilai || ''}</td>
+            <td class="border border-slate-300 p-2">${item.predikat || ''}</td>
+          </tr>
+        `;
+      }).join('');
 
       window.print();
     }
